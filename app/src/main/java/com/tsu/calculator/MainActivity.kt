@@ -2,8 +2,10 @@ package com.tsu.calculator
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,366 +16,343 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tsu.calculator.ui.theme.*
 
 class MainActivity : ComponentActivity() {
+    private val viewModel by viewModels<MainViewModel>();
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             UI()
         }
     }
-}
 
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
-@Composable
-private fun UI() {
-    Column(
-        modifier = Modifier
-            .background(Background)
-            .fillMaxHeight(),
-        verticalArrangement = Arrangement.Bottom,
-    ) {
-        Text(
-            text = "Calculator",
-            fontSize = 28.sp,
-            fontFamily = museo,
-            modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
-        )
-
-        Box(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
-            Image(
-                painter = painterResource(R.drawable.result_bg),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
+    @Composable
+    private fun UI() {
+        Column(
+            modifier = Modifier
+                .background(Background)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom,
+        ) {
             Text(
-                text = "8888888888",
-                color = NumbersBackground,
-                fontFamily = digitalNumbers,
-                fontSize = 37.sp,
-                modifier = Modifier.padding(top = 23.dp, start = 22.dp)
+                text = "Calculator",
+                fontSize = 28.sp,
+                fontFamily = museo,
+                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
             )
-            Text(
-                text = "0123456789",
-                fontFamily = digitalNumbers,
-                fontSize = 37.sp,
-                modifier = Modifier.padding(top = 23.dp, start = 22.dp)
-            )
-        }
 
-        Row(
-            modifier = Modifier
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
+            Box(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
+                Image(
+                    painter = painterResource(R.drawable.result_bg),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 Text(
-                    text = "AC",
-                    style = buttonTextStyle
+                    text = "8888888888",
+                    color = NumbersBackground,
+                    fontFamily = digitalNumbers,
+                    fontSize = 37.sp,
+                    modifier = Modifier.padding(top = 23.dp, start = 22.dp)
+                )
+                Text(
+                    text = "0123456789",
+                    fontFamily = digitalNumbers,
+                    fontSize = 37.sp,
+                    modifier = Modifier.padding(top = 23.dp, start = 22.dp)
                 )
             }
 
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
+                    .padding(top = 24.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "+/-",
-                    style = buttonTextStyle
-                )
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("AC") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("+/-") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("%") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetAccentButton("÷") {
+
+                    }
+                }
             }
 
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "%",
-                    style = buttonTextStyle
-                )
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("7") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("8") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("9") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetAccentButton("X") {
+
+                    }
+                }
             }
 
-            Button(
-                onClick = {},
-                colors = buttonColors(backgroundColor = AccentBlue),
-                shape = RoundedCornerShape(25),
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "÷",
-                    style = accentButtonTextStyle
-                )
-            }
-        }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("4") {
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
+                    }
+                }
+                Box(modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "7",
-                    style = buttonTextStyle
-                )
-            }
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("5") {
 
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
+                    }
+                }
+                Box(modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "8",
-                    style = buttonTextStyle
-                )
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("6") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetAccentButton("-") {
+
+                    }
+                }
             }
 
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "9",
-                    style = buttonTextStyle
-                )
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("1") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("2") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton("3") {
+
+                    }
+                }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetAccentButton("+") {
+
+                    }
+                }
             }
 
-            Button(
-                onClick = {},
-                colors = buttonColors(backgroundColor = AccentBlue),
-                shape = RoundedCornerShape(25),
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 64.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "X",
-                    style = accentButtonTextStyle
-                )
-            }
-        }
+                Box(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(2f)
+                    .aspectRatio(11f / 5)) {
+                    SetButton("0") {
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
+                    }
+                }
+                Box(modifier = Modifier
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                Color.Yellow,
+                                Color.Transparent
+                            )
+                        )
+                    )
                     .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "4",
-                    style = buttonTextStyle
-                )
-            }
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "5",
-                    style = buttonTextStyle
-                )
-            }
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "6",
-                    style = buttonTextStyle
-                )
-            }
-            Button(
-                onClick = {},
-                colors = buttonColors(backgroundColor = AccentBlue),
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "–",
-                    style = accentButtonTextStyle
-                )
-            }
-        }
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetButton(",") {
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
+                    }
+                }
+                Box(modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "1",
-                    style = buttonTextStyle
-                )
-            }
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "2",
-                    style = buttonTextStyle
-                )
-            }
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "3",
-                    style = buttonTextStyle
-                )
-            }
-            Button(
-                onClick = {},
-                colors = buttonColors(backgroundColor = AccentBlue),
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "+",
-                    style = accentButtonTextStyle
-                )
-            }
-        }
+                    .weight(1f)
+                    .aspectRatio(1f)) {
+                    SetAccentButton("=") {
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 64.dp)
-                .fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(2f, fill = true)
-                    .aspectRatio(11f / 5)
-            ) {
-                Text(
-                    text = "0",
-                    style = buttonTextStyle
-                )
-            }
-            TextButton(
-                onClick = {},
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = ",",
-                    style = buttonTextStyle
-                )
-            }
-            Button(
-                onClick = {},
-                colors = buttonColors(backgroundColor = AccentBlue),
-                shape = RoundedCornerShape(25),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f, fill = true)
-                    .aspectRatio(1f)
-            ) {
-                Text(
-                    text = "=",
-                    style = accentButtonTextStyle
-                )
+                    }
+                }
             }
         }
     }
 }
 
-private val buttonTextStyle = TextStyle(
-    fontFamily = montserrat,
-    color = AccentBlue,
-    fontSize = 29.sp,
-    textAlign = TextAlign.Center
-)
+@Composable
+fun SetButton(text: String, action: () -> Unit) {
+    Button(
+        onClick = action,
+        colors = buttonColors(backgroundColor = Background, contentColor = AccentBlue),
+        shape = RoundedCornerShape(25),
+        elevation = null,
+        modifier = Modifier
+            .drawColoredShadow(Color.White, offsetX = (-5).dp, offsetY = (-5).dp)
+            .drawColoredShadow(BlueShadow, alpha = 0.1f, offsetX = 5.dp, offsetY = 5.dp)
+            .fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontFamily = montserrat,
+                color = AccentBlue,
+                fontSize = 29.sp,
+                textAlign = TextAlign.Center
+            ),
+        )
+    }
+}
 
-private val accentButtonTextStyle = TextStyle(
-    fontFamily = montserrat,
-    color = Color.White,
-    fontSize = 29.sp,
-    textAlign = TextAlign.Center
-)
+@Composable
+fun SetAccentButton(text: String, action: () -> Unit) {
+    Button(
+        onClick = action,
+        colors = buttonColors(backgroundColor = AccentBlue),
+        shape = RoundedCornerShape(25),
+        elevation = null,
+        modifier = Modifier
+            .drawColoredShadow(Color.White, offsetX = (-5).dp, offsetY = (-5).dp)
+            .drawColoredShadow(BlueShadow, alpha = 0.1f, offsetX = 5.dp, offsetY = 5.dp)
+            .fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontFamily = montserrat,
+                color = Color.White,
+                fontSize = 29.sp,
+                textAlign = TextAlign.Center
+            )
+        )
+    }
+}
+
+//нашел где-то в интернете :)
+fun Modifier.drawColoredShadow(
+    color: Color,
+    alpha: Float = 1f,
+    borderRadius: Dp = 0.dp,
+    shadowRadius: Dp = 10.dp,
+    offsetY: Dp = 0.dp,
+    offsetX: Dp = 0.dp
+) = this.drawBehind {
+    val transparentColor = android.graphics.Color.toArgb(color.copy(alpha = 0.0f).value.toLong())
+    val shadowColor = android.graphics.Color.toArgb(color.copy(alpha = alpha).value.toLong())
+    this.drawIntoCanvas {
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        frameworkPaint.color = transparentColor
+        frameworkPaint.setShadowLayer(
+            shadowRadius.toPx(),
+            offsetX.toPx(),
+            offsetY.toPx(),
+            shadowColor
+        )
+        it.drawRoundRect(
+            0f,
+            0f,
+            this.size.width,
+            this.size.height,
+            borderRadius.toPx(),
+            borderRadius.toPx(),
+            paint
+        )
+    }
+}
