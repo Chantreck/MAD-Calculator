@@ -21,6 +21,10 @@ class MainViewModel : ViewModel() {
         clear()
     }
 
+    fun action(button: Buttons) {
+
+    }
+
     fun addNumber(number: String) {
         val length = _secondOperand.length
         if (length >= 9) {
