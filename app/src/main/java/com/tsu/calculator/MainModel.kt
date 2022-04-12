@@ -1,5 +1,7 @@
 package com.tsu.calculator
 
+import android.util.Log
+
 class MainModel {
     private var commaAdded = false
 
@@ -9,6 +11,9 @@ class MainModel {
 
     companion object {
         const val MAX_LENGTH = 10
+        private const val DIVISION_ERROR = "Division by zero"
+        private const val OPERATOR_ERROR = "Unknown operator"
+        private const val ERROR = "Error"
     }
 
     private fun calculate(first: Double, second: Double, operator: Buttons): Double {
@@ -17,7 +22,7 @@ class MainModel {
         when (operator) {
             Buttons.DIVIDE -> {
                 if (second.equals(0.0)) {
-                    throw Exception("Division by zero")
+                    throw Exception(DIVISION_ERROR)
                 } else {
                     result = first.div(second)
                 }
@@ -32,7 +37,8 @@ class MainModel {
                 result = first + second
             }
             else -> {
-                throw Exception("Unknown operator")
+                Log.e("Model", OPERATOR_ERROR + " " + operator.label)
+                throw Exception(OPERATOR_ERROR)
             }
         }
 
@@ -48,7 +54,7 @@ class MainModel {
                 return ""
             } else {
                 clear()
-                return "Error"
+                return ERROR
             }
         }
 
@@ -63,7 +69,7 @@ class MainModel {
                 return result.toString()
             } catch (e: Exception) {
                 clear()
-                return "Error"
+                return ERROR
             }
         }
 
