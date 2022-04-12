@@ -50,14 +50,16 @@ class MainActivity : ComponentActivity() {
 
         Spacer(modifier = Modifier.height(DefaultPadding))
 
-        Box {
+        Box(contentAlignment = Alignment.Center) {
             Image(
                 painter = painterResource(R.drawable.result_bg),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth(),
             )
-            SetTextInHeader(text = stringResource(id = R.string.hint), color = NumbersBackground)
-            ShowResult(viewModel.display)
+            Box {
+                SetTextInHeader(text = stringResource(id = R.string.hint), color = NumbersBackground)
+                ShowResult(viewModel.display)
+            }
         }
     }
 
@@ -72,8 +74,7 @@ class MainActivity : ComponentActivity() {
         Text(
             text = text,
             color = color,
-            style = ValueTextStyle,
-            modifier = Modifier.padding(top = DefaultPadding, start = DefaultPadding)
+            style = ValueTextStyle
         )
     }
 

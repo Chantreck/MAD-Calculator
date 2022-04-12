@@ -130,7 +130,7 @@ class MainModel {
 
     fun addNumber(number: String): String {
         val length = _secondOperand.length
-        if (length >= MAX_LENGTH - 1) {
+        if (length >= MAX_LENGTH - 2) {
             return ""
         }
 
@@ -145,7 +145,7 @@ class MainModel {
 
     fun addComma(): String {
         val length = _secondOperand.length
-        if (length >= MAX_LENGTH - 1) {
+        if (length >= MAX_LENGTH - 2) {
             return ""
         }
 
