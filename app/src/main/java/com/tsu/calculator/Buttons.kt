@@ -19,5 +19,6 @@ enum class Buttons(val label: String) {
     PLUS("+"),
     ZERO("0"),
     COMMA(","),
-    EQUAL("=")
+    EQUAL("="),
+    NO_OPERATION("")
 }

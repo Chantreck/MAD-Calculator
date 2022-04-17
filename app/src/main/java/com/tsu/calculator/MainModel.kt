@@ -1,20 +1,22 @@
 package com.tsu.calculator
 
-import android.util.Log
+import timber.log.Timber
 
 class MainModel {
-    private var commaAdded = false
-
-    private var _firstOperand: String = ""
-    private var _secondOperand: String = ""
-    private var _operation: Buttons? = null
-
     companion object {
         const val MAX_LENGTH = 10
         private const val DIVISION_ERROR = "Division by zero"
         private const val OPERATOR_ERROR = "Unknown operator"
         private const val ERROR = "Error"
+        private const val INITIAL_VALUE = "0"
+        private const val EMPTY = ""
+        private const val COMMA_SIGN = "."
     }
+
+    private var commaAdded = false
+    private var firstOperand: String = ""
+    private var secondOperand: String = ""
+    private var operation: Buttons = Buttons.NO_OPERATION
 
     private fun calculate(first: Double, second: Double, operator: Buttons): Double {
         val result: Double
@@ -37,7 +39,7 @@ class MainModel {
                 result = first + second
             }
             else -> {
-                Log.e("Model", OPERATOR_ERROR + " " + operator.label)
+                Timber.e("$OPERATOR_ERROR: ${operator.label}")
                 throw Exception(OPERATOR_ERROR)
             }
         }
@@ -46,140 +48,142 @@ class MainModel {
     }
 
     fun getResult(): String {
-        val operation = _operation
-        if (operation == null) {
-            if (_firstOperand.isEmpty()) {
-                _firstOperand = _secondOperand
+        if (operation == Buttons.NO_OPERATION) {
+            if (firstOperand.isEmpty()) {
+                firstOperand = secondOperand
                 clearSecondOperand()
-                return ""
+                return EMPTY
             } else {
                 clear()
                 return ERROR
             }
         }
 
-        if (_firstOperand.isNotEmpty() && _secondOperand.isNotEmpty()) {
-            val firstNumber = _firstOperand.toDouble()
-            val secondNumber = _secondOperand.toDouble()
+        if (firstOperand.isNotEmpty() && secondOperand.isNotEmpty()) {
+            val firstNumber = firstOperand.toDouble()
+            val secondNumber = secondOperand.toDouble()
 
             try {
                 val result = calculate(firstNumber, secondNumber, operation)
-                _firstOperand = result.toString()
+                firstOperand = result.toString()
                 clearSecondOperand()
-                return result.toString()
+                return firstOperand
             } catch (e: Exception) {
                 clear()
                 return ERROR
             }
         }
 
-        _firstOperand = _secondOperand
+        firstOperand = secondOperand
         clearSecondOperand()
-        return ""
+        return EMPTY
     }
 
     fun setOperation(operation: Buttons): String {
-        if (_firstOperand.isEmpty() && _secondOperand.isEmpty()) {
-            _firstOperand = "0"
+        if (firstOperand.isEmpty() && secondOperand.isEmpty()) {
+            firstOperand = INITIAL_VALUE
         }
 
-        if (_secondOperand.isNotEmpty()) {
+        if (secondOperand.isNotEmpty()) {
             val result = getResult()
-            _operation = operation
+            this.operation = operation
             return result
         }
 
-        _operation = operation
-        return ""
+        this.operation = operation
+        return EMPTY
     }
 
     private fun clearSecondOperand() {
         commaAdded = false
-        _secondOperand = ""
+        secondOperand = EMPTY
     }
 
     fun clear() {
-        _firstOperand = ""
+        firstOperand = EMPTY
         clearSecondOperand()
-        _operation = null
+        operation = Buttons.NO_OPERATION
     }
 
     fun changeSign(): String {
-        if ((_secondOperand.isEmpty() || _secondOperand == "0") &&
-            (_firstOperand.isEmpty() || _firstOperand == "0")
+        if ((secondOperand.isEmpty() || secondOperand == INITIAL_VALUE) &&
+            (firstOperand.isEmpty() || firstOperand == INITIAL_VALUE)
         ) {
             return ""
         }
 
-        if (_secondOperand.isEmpty() || _secondOperand == "0") {
-            if (_firstOperand[0] == '-') {
-                _firstOperand = _firstOperand.drop(1)
+        //TODO change logic in order not to compare strings
+
+        if (secondOperand.isEmpty() || secondOperand == INITIAL_VALUE) {
+            if (firstOperand[0].toString() == Buttons.MINUS.label) {
+                firstOperand = firstOperand.drop(1)
             } else {
-                _firstOperand = "-$_firstOperand"
+                firstOperand = "-$firstOperand"
             }
-            return _firstOperand
+            return firstOperand
         }
 
-        if (_secondOperand[0] == '-') {
-            _secondOperand = _secondOperand.drop(1)
+        if (secondOperand[0].toString() == Buttons.MINUS.label) {
+            secondOperand = secondOperand.drop(1)
         } else {
-            _secondOperand = "-$_secondOperand"
+            secondOperand = "-$secondOperand"
         }
-        return _secondOperand
+        return secondOperand
     }
 
     fun addNumber(number: String): String {
-        val length = _secondOperand.length
+        val length = secondOperand.length
         if (length >= MAX_LENGTH - 2) {
             return ""
         }
 
-        if (_secondOperand.isEmpty() || (_secondOperand == "0" && number == "0")) {
-            _secondOperand = number
+        if (secondOperand.isEmpty() || (secondOperand == INITIAL_VALUE && number == INITIAL_VALUE)) {
+            secondOperand = number
         } else {
-            _secondOperand += number
+            secondOperand += number
         }
 
-        return _secondOperand
+        return secondOperand
     }
 
     fun addComma(): String {
-        val length = _secondOperand.length
+        val length = secondOperand.length
         if (length >= MAX_LENGTH - 2) {
-            return ""
+            return EMPTY
         }
 
-        if (_secondOperand.isEmpty()) {
-            _secondOperand = "0."
+        if (secondOperand.isEmpty()) {
             commaAdded = true
-        } else {
-            if (commaAdded) {
-                return ""
-            }
-            _secondOperand += "."
-            commaAdded = true
+            secondOperand = INITIAL_VALUE + COMMA_SIGN
+            return secondOperand
         }
 
-        return _secondOperand
+        if (commaAdded) {
+            return EMPTY
+        }
+
+        commaAdded = true
+        secondOperand += COMMA_SIGN
+        return secondOperand
     }
 
     fun getPercentage(): String {
         val number: String = when {
-            _firstOperand.isNotEmpty() -> {
-                _firstOperand
+            firstOperand.isNotEmpty() -> {
+                firstOperand
             }
-            _secondOperand.isNotEmpty() -> {
-                _secondOperand
+            secondOperand.isNotEmpty() -> {
+                secondOperand
             }
             else -> {
-                return ""
+                return EMPTY
             }
         }
 
         val result = number.toDouble() / 100.0
-        _firstOperand = result.toString()
+        firstOperand = result.toString()
         clearSecondOperand()
 
-        return _firstOperand
+        return firstOperand
     }
 }
