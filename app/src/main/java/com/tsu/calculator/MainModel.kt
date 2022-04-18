@@ -11,11 +11,12 @@ class MainModel {
         private const val INITIAL_VALUE = "0"
         private const val EMPTY = ""
         private const val COMMA_SIGN = "."
+        private const val UNARY_MINUS = "-"
     }
 
     private var commaAdded = false
-    private var firstOperand: String = ""
-    private var secondOperand: String = ""
+    private var firstOperand: String = EMPTY
+    private var secondOperand: String = EMPTY
     private var operation: Buttons = Buttons.NO_OPERATION
 
     private fun calculate(first: Double, second: Double, operator: Buttons): Double {
@@ -107,34 +108,31 @@ class MainModel {
 
     fun changeSign(): String {
         if ((secondOperand.isEmpty() || secondOperand == INITIAL_VALUE) &&
-            (firstOperand.isEmpty() || firstOperand == INITIAL_VALUE)
-        ) {
-            return ""
+            (firstOperand.isEmpty() || firstOperand == INITIAL_VALUE)) {
+            return EMPTY
         }
 
-        //TODO change logic in order not to compare strings
-
         if (secondOperand.isEmpty() || secondOperand == INITIAL_VALUE) {
-            if (firstOperand[0].toString() == Buttons.MINUS.label) {
-                firstOperand = firstOperand.drop(1)
-            } else {
-                firstOperand = "-$firstOperand"
-            }
+            firstOperand = changeSignForOperand(firstOperand)
             return firstOperand
         }
 
-        if (secondOperand[0].toString() == Buttons.MINUS.label) {
-            secondOperand = secondOperand.drop(1)
-        } else {
-            secondOperand = "-$secondOperand"
-        }
+        secondOperand = changeSignForOperand(secondOperand)
         return secondOperand
+    }
+
+    private fun changeSignForOperand(operand: String): String {
+        if (operand.startsWith(UNARY_MINUS)) {
+            return operand.drop(1)
+        } else {
+            return UNARY_MINUS + operand
+        }
     }
 
     fun addNumber(number: String): String {
         val length = secondOperand.length
         if (length >= MAX_LENGTH - 2) {
-            return ""
+            return EMPTY
         }
 
         if (secondOperand.isEmpty() || (secondOperand == INITIAL_VALUE && number == INITIAL_VALUE)) {
