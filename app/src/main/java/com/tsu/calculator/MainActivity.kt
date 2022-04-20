@@ -1,6 +1,5 @@
 package com.tsu.calculator
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,331 +7,182 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import com.tsu.calculator.ui.theme.*
+import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainViewModel>();
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
         setContent {
-            DrawUI()
-        }
-    }
-
-    @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_NO)
-    @Composable
-    private fun DrawUI() {
-        Column(
-            modifier = Modifier
-                .background(Background)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom,
-        ) {
-            DrawHeader()
-            DrawButtons()
+            Box(
+                modifier = Modifier
+                    .background(Background)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Column(modifier = Modifier.padding(horizontal = DefaultPadding)) {
+                    SetHeader()
+                    SetButtons()
+                }
+            }
         }
     }
 
     @Composable
-    private fun DrawHeader() {
+    private fun SetHeader() {
         Text(
-            text = "Calculator",
-            fontSize = 28.sp,
-            fontFamily = museo,
-            modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
+            text = stringResource(id = R.string.app_name),
+            style = TitleTextStyle,
         )
 
-        Box(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
+        Spacer(modifier = Modifier.height(DefaultPadding))
+
+        Box(contentAlignment = Alignment.Center) {
             Image(
                 painter = painterResource(R.drawable.result_bg),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Text(
-                text = "88888888888",
-                color = NumbersBackground,
-                fontFamily = digitalNumbers,
-                fontSize = 37.sp,
-                modifier = Modifier.padding(top = 23.dp, start = 22.dp)
-            )
-
-            ShowResult(viewModel.display)
+            Box {
+                SetTextInHeader(text = stringResource(id = R.string.hint), color = NumbersBackground)
+                ShowResult(viewModel.display)
+            }
         }
     }
 
     @Composable
     private fun ShowResult(resultData: LiveData<String>) {
         val result by resultData.observeAsState(initial = "0")
+        SetTextInHeader(text = result, color = Color.Black)
+    }
 
+    @Composable
+    private fun SetTextInHeader(text: String, color: Color) {
         Text(
-            text = result,
-            textAlign = TextAlign.End,
-            fontFamily = digitalNumbers,
-            fontSize = 37.sp,
-            modifier = Modifier.padding(top = 23.dp, start = 22.dp)
+            text = text,
+            color = color,
+            style = ValueTextStyle
         )
     }
 
     @Composable
-    private fun DrawButtons() {
-        Row(
-            modifier = Modifier
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("C") {
-                    viewModel.clear()
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("+/-") {
-                    viewModel.changeSign()
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("%") {
-                    viewModel.setOperation("percent")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetAccentButton("÷") {
-                    viewModel.setOperation("divide")
-                }
-            }
+    private fun SetButtons() {
+        Spacer(modifier = Modifier.height(DefaultPadding))
+
+        val rows = listOf(
+            listOf(Buttons.CLEAR, Buttons.PLUS_MINUS, Buttons.PERCENT, Buttons.DIVIDE),
+            listOf(Buttons.SEVEN, Buttons.EIGHT, Buttons.NINE, Buttons.MULTIPLY),
+            listOf(Buttons.FOUR, Buttons.FIVE, Buttons.SIX, Buttons.MINUS),
+            listOf(Buttons.ONE, Buttons.TWO, Buttons.THREE, Buttons.PLUS),
+            listOf(Buttons.ZERO, Buttons.COMMA, Buttons.EQUAL)
+        )
+        for (row in rows) {
+            SetButtonRow(buttons = row)
         }
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("7") {
-                    viewModel.addNumber("7")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("8") {
-                    viewModel.addNumber("8")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("9") {
-                    viewModel.addNumber("9")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetAccentButton("X") {
-                    viewModel.setOperation("multiply")
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("4") {
-                    viewModel.addNumber("4")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("5") {
-                    viewModel.addNumber("5")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("6") {
-                    viewModel.addNumber("6")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetAccentButton("-") {
-                    viewModel.setOperation("subtract")
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("1") {
-                    viewModel.addNumber("1")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("2") {
-                    viewModel.addNumber("2")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton("3") {
-                    viewModel.addNumber("3")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetAccentButton("+") {
-                    viewModel.setOperation("add")
-                }
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 64.dp)
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(2f)
-                .aspectRatio(11f / 5)) {
-                SetButton("0") {
-                    viewModel.addNumber("0")
-                }
-            }
-            Box(modifier = Modifier
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color.Yellow,
-                            Color.Transparent
-                        )
-                    )
-                )
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetButton(",") {
-                    viewModel.addNumber(".")
-                }
-            }
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .aspectRatio(1f)) {
-                SetAccentButton("=") {
-                    viewModel.getResult()
-                }
-            }
-        }
+        Spacer(modifier = Modifier.height(LastRowPadding))
     }
 
     @Composable
-    private fun SetButton(text: String, action: () -> Unit) {
+    private fun SetButtonRow(buttons: List<Buttons>) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (buttons.size == 3) {
+                Box(modifier = Modifier
+                    .weight(WideButtonWeight)
+                    .aspectRatio(WideButtonWeight)) {
+                    SetButton(buttons[0])
+                }
+            } else {
+                Box(modifier = Modifier
+                    .weight(ButtonWeight)
+                    .aspectRatio(ButtonWeight)) {
+                    SetButton(buttons[0])
+                }
+                SpacerBetweenButtons()
+
+                Box(modifier = Modifier
+                    .weight(ButtonWeight)
+                    .aspectRatio(ButtonWeight)) {
+                    SetButton(buttons[1])
+                }
+            }
+            SpacerBetweenButtons()
+
+            Box(modifier = Modifier
+                .weight(ButtonWeight)
+                .aspectRatio(ButtonWeight)) {
+                SetButton(buttons[buttons.size - 2])
+            }
+            SpacerBetweenButtons()
+
+            Box(modifier = Modifier
+                .weight(ButtonWeight)
+                .aspectRatio(ButtonWeight)) {
+                SetAccentButton(buttons[buttons.size - 1])
+            }
+        }
+        Spacer(modifier = Modifier.height(SmallerPadding))
+    }
+
+    @Composable
+    private fun SpacerBetweenButtons() {
+        Spacer(modifier = Modifier.width(SmallerPadding))
+    }
+
+    @Composable
+    private fun SetButton(action: Buttons) {
         Button(
-            onClick = action,
-            colors = buttonColors(backgroundColor = Background, contentColor = AccentBlue),
-            shape = RoundedCornerShape(25),
+            onClick = {
+                viewModel.action(action)
+            },
+            colors = buttonColors(backgroundColor = Background),
+            shape = ButtonShape,
             elevation = null,
-            modifier = Modifier
-                .drawColoredShadow(Color.White, offsetX = (-5).dp, offsetY = (-5).dp)
-                .drawColoredShadow(BlueShadow, alpha = 0.1f, offsetX = 5.dp, offsetY = 5.dp)
-                .fillMaxSize()
+            modifier = ButtonModifier
         ) {
             Text(
-                text = text,
-                style = TextStyle(
-                    fontFamily = montserrat,
-                    color = AccentBlue,
-                    fontSize = 28.sp,
-                    textAlign = TextAlign.Center
-                ),
+                text = action.label,
+                style = ButtonTextStyle
             )
         }
     }
 
     @Composable
-    private fun SetAccentButton(text: String, action: () -> Unit) {
+    private fun SetAccentButton(action: Buttons) {
         Button(
-            onClick = action,
+            onClick = {
+                viewModel.action(action)
+            },
             colors = buttonColors(backgroundColor = AccentBlue),
-            shape = RoundedCornerShape(25),
+            shape = ButtonShape,
             elevation = null,
-            modifier = Modifier
-                .drawColoredShadow(Color.White, offsetX = (-5).dp, offsetY = (-5).dp)
-                .drawColoredShadow(BlueShadow, alpha = 0.1f, offsetX = 5.dp, offsetY = 5.dp)
-                .fillMaxSize()
+            modifier = AccentButtonModifier
         ) {
             Text(
-                text = text,
-                style = TextStyle(
-                    fontFamily = montserrat,
-                    color = Color.White,
-                    fontSize = 28.sp,
-                    textAlign = TextAlign.Center
-                )
+                text = action.label,
+                style = AccentButtonTextStyle
             )
         }
     }

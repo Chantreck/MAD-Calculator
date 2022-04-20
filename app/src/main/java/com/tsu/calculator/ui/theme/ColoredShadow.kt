@@ -1,4 +1,4 @@
-package com.tsu.calculator
+package com.tsu.calculator.ui.theme
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -12,11 +12,12 @@ import androidx.compose.ui.unit.dp
 fun Modifier.drawColoredShadow(
     color: Color,
     alpha: Float = 1f,
-    borderRadius: Dp = 0.dp,
-    shadowRadius: Dp = 10.dp,
-    offsetY: Dp = 0.dp,
-    offsetX: Dp = 0.dp
+    offsetY: Dp,
+    offsetX: Dp
 ) = this.drawBehind {
+    val borderRadius = 0.dp
+    val shadowRadius = 10.dp
+
     val transparentColor = android.graphics.Color.toArgb(color.copy(alpha = 0.0f).value.toLong())
     val shadowColor = android.graphics.Color.toArgb(color.copy(alpha = alpha).value.toLong())
     this.drawIntoCanvas {
